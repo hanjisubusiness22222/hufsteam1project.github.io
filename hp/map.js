@@ -184,9 +184,10 @@ hufsBuildings.forEach((b) => {
   buildingMarkers[b.buildingNo] = marker;
 
   const popupContent = `
-    <div style="font-family:'Pretendard',sans-serif;padding:6px;">
+    <div style="font-family:'Pretendard',sans-serif;padding:6px;min-width:180px;">
       <span style="font-size:0.75rem;background:#fef8ec;color:#002c5f;border:1px solid #c5a059;padding:2px 6px;border-radius:4px;font-weight:700;">건물번호: [ ${b.buildingNo} ] 번</span>
       <h3 style="margin:6px 0 3px;font-size:1.05rem;color:#002c5f;">${b.name}</h3>
+      <p style="font-size:0.72rem;color:#004b93;margin-bottom:4px;font-weight:600;">📍 GPS: ${b.lat}, ${b.lng}</p>
       <p style="font-size:0.75rem;color:#64748b;margin-bottom:6px;">별칭: ${b.aliases.join(', ')}</p>
       <p style="font-size:0.85rem;color:#334155;line-height:1.4;">${b.desc}</p>
     </div>
@@ -238,7 +239,12 @@ function showBuildingDetail(building) {
     cardBadge.textContent = `건물번호: [ ${building.buildingNo} ] 번`;
   }
   cardName.textContent = building.name;
-  cardAliases.textContent = `별칭 / 코드: ${building.aliases.join(', ')}`;
+  cardAliases.innerHTML = `
+    <span>별칭 / 코드: ${building.aliases.join(', ')}</span><br>
+    <span style="display:inline-block;margin-top:4px;color:#004b93;font-weight:600;font-size:0.8rem;background:#eef6ff;padding:2px 8px;border-radius:4px;border:1px solid #cce3fd;">
+      📍 GPS 좌표: ${building.lat}, ${building.lng}
+    </span>
+  `;
   cardDesc.textContent = building.desc;
   cardRouteBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${building.lat},${building.lng}`;
   cardRouteBtn.textContent = `🧭 구글 길찾기 ↗`;
