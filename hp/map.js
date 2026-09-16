@@ -169,3 +169,67 @@ if (btnCloseInfoCard) {
     if (card) card.style.display = 'none';
   });
 }
+
+// 4. 내 GPS 위치 찾기 기능
+const btnMyLocation = document.getElementById('btnMyLocation');
+if (btnMyLocation) {
+  btnMyLocation.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      alert("현재 사용 중인 브라우저에서 GPS 위치 서비스를 지원하지 않습니다.");
+      return;
+    }
+
+    const originalText = btnMyLocation.innerHTML;
+    btnMyLocation.innerHTML = "⏳ 위치 찾는 중...";
+    btnMyLocation.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        btnMyLocation.innerHTML = originalText;
+        btnMyLocation.disabled = false;
+
+        const myLat = position.coords.latitude;
+        const myLng = position.coords.longitude;
+        const accuracy = Math.round(position.coords.accuracy);
+
+        // 구글 지도 iframe 위치를 내 현재 위치로 이동
+        const embedUrl = `https://maps.google.com/maps?q=${myLat},${myLng}&hl=ko&z=18&output=embed`;
+        googleMapFrame.src = embedUrl;
+
+        // 결과 카드 업데이트
+        if (cardBadge) {
+          cardBadge.textContent = "📍 실시간 GPS 내 위치";
+        }
+        cardName.textContent = "현재 내 위치 (GPS)";
+        cardAliases.textContent = `위도: ${myLat.toFixed(6)}, 경도: ${myLng.toFixed(6)} (정확도: ±${accuracy}m)`;
+        cardDesc.textContent = "스마트폰/PC의 GPS 센서를 기반으로 측정한 현재 위치입니다. 캠퍼스 내 위치를 확인하고 목적지 건물을 검색해 보세요!";
+        cardRouteBtn.href = `https://www.google.com/maps/search/?api=1&query=${myLat},${myLng}`;
+        cardRouteBtn.textContent = "🧭 구글 지도에서 내 위치 크게 보기 ↗";
+
+        // 카드 애니메이션 리셋
+        buildingResultCard.style.animation = 'none';
+        buildingResultCard.offsetHeight;
+        buildingResultCard.style.animation = 'slideIn 0.3s ease-out';
+      },
+      (error) => {
+        btnMyLocation.innerHTML = originalText;
+        btnMyLocation.disabled = false;
+
+        let errorMsg = "위치 정보를 가져오지 못했습니다.";
+        if (error.code === error.PERMISSION_DENIED) {
+          errorMsg = "브라우저 위치 권한이 차단되어 있습니다.\n브라우저 상단 주소창 옆 자물쇠/권한 설정에서 '위치 접근'을 허용해 주세요!";
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          errorMsg = "현재 GPS 신호를 수신할 수 없습니다.";
+        } else if (error.code === error.TIMEOUT) {
+          errorMsg = "위치 정보를 가져오는 데 시간이 초과되었습니다.";
+        }
+        alert(errorMsg);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  });
+}
