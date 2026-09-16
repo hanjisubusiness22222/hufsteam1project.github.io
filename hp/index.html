@@ -6,6 +6,8 @@
   <title>HUFS 캠퍼스 맵 길찾기 | 1팀 (최수미, 한지수)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+  <!-- Leaflet.js 지도 라이브러리 (API 키 불필요, 둘레선/폴리곤 완벽 지원) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     :root {
       --hufs-navy: #002c5f;
@@ -41,7 +43,7 @@
       color: white;
       padding: 14px 24px;
       box-shadow: 0 4px 12px rgba(0, 44, 95, 0.15);
-      z-index: 10;
+      z-index: 1000;
     }
 
     .header-top {
@@ -94,6 +96,12 @@
       margin-top: 2px;
     }
 
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .team-badge {
       display: inline-flex;
       align-items: center;
@@ -123,14 +131,14 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      z-index: 9;
+      z-index: 999;
     }
 
     .search-bar-wrap {
       display: flex;
       align-items: center;
       gap: 10px;
-      max-width: 760px;
+      max-width: 840px;
       width: 100%;
     }
 
@@ -166,7 +174,7 @@
     }
 
     .btn-search {
-      padding: 12px 22px;
+      padding: 12px 20px;
       background: var(--hufs-navy);
       color: white;
       border: none;
@@ -202,9 +210,27 @@
       background: #059669;
     }
 
-    .btn-my-location:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
+    .btn-toggle-boundary {
+      padding: 12px 18px;
+      background: #f1f5f9;
+      color: var(--hufs-navy);
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-toggle-boundary.active {
+      background: var(--hufs-navy);
+      color: #f1c40f;
+      border-color: var(--hufs-navy);
+      box-shadow: 0 2px 8px rgba(0, 44, 95, 0.25);
     }
 
     /* 빠른 태그 칩 */
@@ -237,7 +263,7 @@
       background: var(--hufs-gold-light);
       border-color: var(--hufs-gold);
       color: var(--hufs-navy);
-      font-weight: 600;
+      font-weight: 700;
       transform: translateY(-1px);
     }
 
@@ -249,10 +275,48 @@
       height: 100%;
     }
 
-    #googleMapFrame {
+    #map {
       width: 100%;
       height: 100%;
-      border: none;
+    }
+
+    /* 커스텀 건물 핀 스타일 */
+    .custom-building-pin {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .pin-bubble {
+      background: var(--hufs-navy);
+      color: white;
+      padding: 4px 9px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(0, 44, 95, 0.35);
+      border: 2px solid #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    .pin-bubble:hover {
+      transform: scale(1.1);
+      background: var(--hufs-blue);
+      border-color: var(--hufs-gold);
+    }
+
+    .pin-no-badge {
+      background: #f1c40f;
+      color: #002c5f;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
     }
 
     /* 검색 결과 팝업 카드 */
@@ -266,7 +330,7 @@
       padding: 18px;
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
       border: 2px solid var(--hufs-navy);
-      z-index: 10;
+      z-index: 1000;
       animation: slideIn 0.3s ease-out;
     }
 
@@ -344,7 +408,7 @@
       border-radius: 14px;
       padding: 16px;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      z-index: 8;
+      z-index: 1000;
       font-size: 0.85rem;
       line-height: 1.5;
     }
@@ -390,6 +454,7 @@
       .brand-title { font-size: 1.1rem; }
       .team-badge { font-size: 0.75rem; padding: 4px 10px; }
       .search-panel { padding: 10px 16px; }
+      .search-bar-wrap { flex-wrap: wrap; }
       .building-result-card {
         top: auto;
         bottom: 10px;
@@ -411,14 +476,16 @@
         <div>
           <h1 class="brand-title">
             HUFS 스마트 캠퍼스 길찾기
-            <span class="badge-campus">Google Maps 기반</span>
+            <span class="badge-campus">서울캠퍼스</span>
           </h1>
           <p class="brand-desc">외대생을 위한 캠퍼스 건물 & 지름길 맞춤형 위치 가이드</p>
         </div>
       </div>
-      <div class="team-badge">
-        <span class="dot"></span>
-        <span>1팀: 최수미, 한지수</span>
+      <div class="header-controls">
+        <div class="team-badge">
+          <span class="dot"></span>
+          <span>1팀: 최수미, 한지수</span>
+        </div>
       </div>
     </div>
   </header>
@@ -431,6 +498,9 @@
         <input type="text" id="searchInput" placeholder="건물명, 번호 또는 별칭을 입력하세요 (예: 1, 0, B, C, 미콤, 사관)" autocomplete="off">
       </div>
       <button class="btn-search" id="searchBtn">건물 찾기</button>
+      <button type="button" class="btn-toggle-boundary active" id="btnToggleBoundary" title="캠퍼스 부지 둘레선 표시 켜기/끄기">
+        🏫 캠퍼스 둘레선 (ON)
+      </button>
       <button type="button" class="btn-my-location" id="btnMyLocation" title="현재 내 GPS 위치 보기">📍 내 위치</button>
     </div>
 
@@ -451,24 +521,18 @@
     </div>
   </section>
 
-  <!-- 3. 구글 지도 영역 (100% 안정적 iframe) -->
+  <!-- 3. 인터랙티브 지도 영역 (둘레선/폴리곤 완벽 표출) -->
   <div class="map-container-wrap">
-    <iframe 
-      id="googleMapFrame" 
-      src="https://maps.google.com/maps?q=37.597148,127.057850&hl=ko&z=17&output=embed" 
-      allowfullscreen 
-      loading="lazy" 
-      referrerpolicy="no-referrer-when-downgrade">
-    </iframe>
+    <div id="map"></div>
 
     <!-- 검색 결과 플로팅 카드 -->
     <div class="building-result-card" id="buildingResultCard">
-      <span class="result-badge" id="cardBadge">외대 서울캠퍼스 맵</span>
-      <h2 class="result-title" id="cardName">한국외대 서울캠퍼스</h2>
-      <p class="result-aliases" id="cardAliases">별칭: 본관, 미콤, 사관 등 검색 가능</p>
-      <p class="result-desc" id="cardDesc">상단 검색창이나 자주 찾는 건물 칩을 누르시면 해당 건물로 지도가 즉시 포커싱됩니다.</p>
+      <span class="result-badge" id="cardBadge">외대 서울캠퍼스 둘레선 표시 중</span>
+      <h2 class="result-title" id="cardName">한국외국어대학교 서울캠퍼스</h2>
+      <p class="result-aliases" id="cardAliases">건물번호: 0, 1, 2, 3, 5, 8, 9, 11, B, C, D</p>
+      <p class="result-desc" id="cardDesc">상단 둘레선 버튼을 누르시면 외대 부지만 둘러싼 네이비 라인을 켜거나 끌 수 있습니다. 칩이나 검색을 누르면 건물로 바로 이동합니다.</p>
       <div class="result-actions">
-        <a id="cardRouteBtn" href="https://www.google.com/maps/dir/?api=1&destination=37.597148,127.057850" target="_blank" class="btn-route">
+        <a id="cardRouteBtn" href="https://www.google.com/maps/dir/?api=1&destination=37.597348,127.057670" target="_blank" class="btn-route">
           🧭 구글 길찾기 안내 ↗
         </a>
       </div>
@@ -482,16 +546,19 @@
       </div>
       <p class="info-card-desc">
         기존 지도는 도로명 주소 기반이라 캠퍼스 내부 건물명을 찾기 어렵습니다. 
-        <strong>외대 1팀</strong>에서는 외대생들의 실제 언어(별칭)와 주요 시설 정보를 기반으로 빠르고 정확한 위치 안내를 제공합니다.
+        <strong>외대 1팀</strong>에서는 외대생들의 실제 언어(별칭)와 공식 건물번호, 그리고 <strong>캠퍼스 정밀 둘레선</strong>을 기반으로 편리한 위치 안내를 제공합니다.
       </p>
       <div class="info-features">
-        <div>• 📍 <strong>별칭 매핑:</strong> '미콤', '사관' 검색 시 즉시 해당 건물 이동</div>
-        <div>• 🏢 <strong>시설 안내:</strong> 주요 층별 시설 및 대강당/열람실 위치 안내</div>
+        <div>• 🏫 <strong>캠퍼스 둘레선:</strong> 외대 부지만 정밀하게 둘러싼 시그니처 네이비 라인 표출</div>
+        <div>• 📍 <strong>별칭 & 번호 매핑:</strong> '1', 'B', '미콤', '사관' 검색 시 즉시 해당 건물 이동</div>
+        <div>• 🧭 <strong>실시간 GPS:</strong> 캠퍼스 내 내 현재 위치 확인 및 도보 길찾기 지원</div>
         <div>• 👥 <strong>제작:</strong> 한국외국어대학교 기술개발연구프로젝트 1팀</div>
       </div>
     </div>
   </div>
 
+  <!-- Leaflet 라이브러리 로드 -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="map.js"></script>
 </body>
 
