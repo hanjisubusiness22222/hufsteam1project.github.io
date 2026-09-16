@@ -3,67 +3,417 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>HUFS 건물 찾기</title>
+  <title>HUFS 캠퍼스 맵 길찾기 | 1팀 (최수미, 한지수)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Pretendard 폰트 불러오기 -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
   <style>
-    body {
+    :root {
+      --hufs-navy: #002c5f;
+      --hufs-blue: #004b93;
+      --hufs-gold: #c5a059;
+      --hufs-gold-light: #fef8ec;
+      --bg-gray: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-sub: #64748b;
+      --border-color: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Pretendard', sans-serif;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-gray);
+      color: var(--text-main);
       display: flex;
       flex-direction: column;
       height: 100vh;
+      overflow: hidden;
     }
 
-    .search-box {
-      padding: 15px;
-      background: #002b5c;
+    /* 상단 헤더 */
+    .app-header {
+      background: linear-gradient(135deg, var(--hufs-navy) 0%, var(--hufs-blue) 100%);
       color: white;
+      padding: 14px 24px;
+      box-shadow: 0 4px 12px rgba(0, 44, 95, 0.15);
+      z-index: 10;
+    }
+
+    .header-top {
       display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
       gap: 10px;
     }
 
-    .search-box input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 4px;
-      border: none;
-      font-size: 16px;
-      outline: none;
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .search-box button {
-      padding: 10px 20px;
-      background: #f1c40f;
-      color: #002b5c;
-      border: none;
-      border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
+    .brand-icon {
+      font-size: 28px;
+      background: rgba(255, 255, 255, 0.15);
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
     }
 
-    #map {
-      flex: 1;
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-campus {
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--hufs-gold);
+      color: #002c5f;
+      padding: 2px 8px;
+      border-radius: 100px;
+      letter-spacing: 0;
+    }
+
+    .brand-desc {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      margin-top: 2px;
+    }
+
+    .team-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .team-badge span.dot {
+      width: 8px;
+      height: 8px;
+      background-color: #4ade80;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* 검색 & 필터 영역 */
+    .search-panel {
+      padding: 12px 24px;
+      background: white;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 9;
+    }
+
+    .search-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 760px;
       width: 100%;
     }
 
-    .info-window {
-      padding: 10px;
-      font-size: 14px;
-      color: #333;
+    .search-input-box {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input-box .icon {
+      position: absolute;
+      left: 14px;
+      font-size: 18px;
+      color: var(--text-sub);
+    }
+
+    .search-input-box input {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      font-size: 0.95rem;
+      border: 1.5px solid var(--border-color);
+      border-radius: 10px;
+      outline: none;
+      transition: all 0.2s ease;
+      background: #f8fafc;
+    }
+
+    .search-input-box input:focus {
+      border-color: var(--hufs-blue);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(0, 75, 147, 0.1);
+    }
+
+    .btn-search {
+      padding: 12px 22px;
+      background: var(--hufs-navy);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-search:hover {
+      background: var(--hufs-blue);
+    }
+
+    /* 추천/빠른 태그 칩 */
+    .quick-tags {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tags-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+
+    .tag-chip {
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tag-chip:hover {
+      background: var(--hufs-gold-light);
+      border-color: var(--hufs-gold);
+      color: var(--hufs-navy);
+      font-weight: 600;
+      transform: translateY(-1px);
+    }
+
+    /* 메인 지도 컨테이너 */
+    .map-container-wrap {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* 안내 플로팅 카드 (서비스 소개) */
+    .service-info-card {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      max-width: 380px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      z-index: 8;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .info-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .info-card-title {
+      font-weight: 700;
+      color: var(--hufs-navy);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-card-close {
+      background: none;
+      border: none;
+      font-size: 16px;
+      color: var(--text-sub);
+      cursor: pointer;
+    }
+
+    .info-card-desc {
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .info-features {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: #64748b;
+      font-size: 0.78rem;
+    }
+
+    /* 카카오 인포윈도우 커스텀 스타일 */
+    .custom-infowindow {
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: white;
+      min-width: 200px;
+      max-width: 280px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+      font-family: 'Pretendard', sans-serif;
+    }
+
+    .iw-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      background: var(--hufs-gold-light);
+      color: var(--hufs-navy);
+      border: 1px solid var(--hufs-gold);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .iw-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--hufs-navy);
+      margin-bottom: 4px;
+    }
+
+    .iw-aliases {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+
+    .iw-desc {
+      font-size: 0.85rem;
+      color: #475569;
       line-height: 1.4;
     }
+
+    @media (max-width: 640px) {
+      .app-header {
+        padding: 12px 16px;
+      }
+      .brand-title {
+        font-size: 1.1rem;
+      }
+      .team-badge {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+      }
+      .search-panel {
+        padding: 10px 16px;
+      }
+      .service-info-card {
+        display: none; /* 모바일에서는 맵 시야 확보를 위해 안내카드 숨김 */
+      }
+    }
   </style>
-  <!-- TODO (Person A): 카카오 디벨로퍼스에서 발급받은 JS API 키를 아래 appkey= 뒤에 넣으세요 -->
   <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=5d201b1815b6a6a5cd5bdfc894abbb26"></script>
 </head>
 
 <body>
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="건물명이나 별칭을 검색하세요 (예: 미콤)">
-    <button id="searchBtn">검색</button>
+  <!-- 1. 상단 글로벌 네비게이션 헤더 -->
+  <header class="app-header">
+    <div class="header-top">
+      <div class="brand-area">
+        <div class="brand-icon">🦉</div>
+        <div>
+          <h1 class="brand-title">
+            HUFS 스마트 캠퍼스 길찾기
+            <span class="badge-campus">서울캠퍼스</span>
+          </h1>
+          <p class="brand-desc">외대생을 위한 캠퍼스 건물 & 지름길 맞춤형 위치 가이드</p>
+        </div>
+      </div>
+      <div class="team-badge">
+        <span class="dot"></span>
+        <span>1팀: 최수미, 한지수</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. 건물 검색 및 빠른 태그 패널 -->
+  <section class="search-panel">
+    <div class="search-bar-wrap">
+      <div class="search-input-box">
+        <span class="icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="건물명 또는 별칭을 입력하세요 (예: 미콤, 사관, 도서관, 본관)" autocomplete="off">
+      </div>
+      <button class="btn-search" id="searchBtn">건물 찾기</button>
+    </div>
+
+    <!-- 빠른 검색 태그 칩 -->
+    <div class="quick-tags">
+      <span class="tags-label">자주 찾는 건물:</span>
+      <button type="button" class="tag-chip" data-query="본관">#본관</button>
+      <button type="button" class="tag-chip" data-query="미콤">#미네르바(미콤)</button>
+      <button type="button" class="tag-chip" data-query="사관">#사이버관(사관)</button>
+      <button type="button" class="tag-chip" data-query="도서관">#스마트도서관</button>
+      <button type="button" class="tag-chip" data-query="교수회관">#교수회관</button>
+      <button type="button" class="tag-chip" data-query="인문관">#인문관</button>
+      <button type="button" class="tag-chip" data-query="국제학사">#국제학사</button>
+    </div>
+  </section>
+
+  <!-- 3. 카카오맵 영역 -->
+  <div class="map-container-wrap">
+    <div id="map"></div>
+
+    <!-- 서비스 소개 플로팅 카드 -->
+    <div class="service-info-card" id="serviceInfoCard">
+      <div class="info-card-header">
+        <span class="info-card-title">💡 어떤 서비스인가요?</span>
+        <button type="button" class="info-card-close" id="btnCloseInfoCard" title="닫기">✕</button>
+      </div>
+      <p class="info-card-desc">
+        기존 구글/네이버 지도는 도로명 주소 기반이라 건물 이름을 찾기 어렵습니다. 
+        <strong>외대 1팀</strong>에서는 외대생들의 실제 언어(별칭)와 주요 시설 정보를 기반으로 빠르고 정확한 건물 탐색을 지원합니다.
+      </p>
+      <div class="info-features">
+        <div>• 📍 <strong>별칭 매핑:</strong> '미콤', '사관' 검색 시 즉시 해당 건물 이동</div>
+        <div>• 🏢 <strong>시설 안내:</strong> 주요 층별 시설 및 대강당/열람실 위치 안내</div>
+        <div>• 👥 <strong>제작:</strong> 한국외국어대학교 기술개발연구프로젝트 1팀</div>
+      </div>
+    </div>
   </div>
-  <div id="map"></div>
+
   <script src="map.js"></script>
 </body>
 
