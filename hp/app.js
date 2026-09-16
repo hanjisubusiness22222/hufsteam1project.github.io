@@ -19,8 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function maskPhone(phone) {
-    if (!phone) return "010-****-0000";
+    if (!phone) return "010-0000-0000";
     const str = String(phone).trim();
+    if (str === "010-0000-0000") return str;
     if (str.includes("*")) return str;
     const matched = str.match(/^(\d{2,3})-?(\d{3,4})-?(\d{4})$/);
     if (matched) {
@@ -30,14 +31,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const initialMembers = [
-    { id: 1, name: "이*원", phone: "010-****-8821", channel: "소모임", attendance: 8, fee: "완료", book: "도둑맞은 집중력", role: "정회원", note: "제출" },
-    { id: 2, name: "박*영", phone: "010-****-3847", channel: "당근", attendance: 3, fee: "완료", book: "도둑맞은 집중력", role: "일반회원", note: "제출" },
-    { id: 3, name: "최*연", phone: "010-****-1192", channel: "인스타", attendance: 12, fee: "완료", book: "물고기는 존재하지 않는다", role: "운영진", note: "제출" },
-    { id: 4, name: "정*호", phone: "010-****-9302", channel: "에타", attendance: 2, fee: "대기", book: "도둑맞은 집중력", role: "신규회원", note: "미제출" },
-    { id: 5, name: "한*은", phone: "010-****-2051", channel: "카카오톡", attendance: 6, fee: "완료", book: "원씽 (The ONE Thing)", role: "정회원", note: "제출" },
-    { id: 6, name: "윤*현", phone: "010-****-1403", channel: "네이버", attendance: 4, fee: "대기", book: "도둑맞은 집중력", role: "일반회원", note: "미제출" },
-    { id: 7, name: "김*현", phone: "010-****-3829", channel: "소모임", attendance: 9, fee: "완료", book: "클린 코드", role: "호스트", note: "제출" },
-    { id: 8, name: "임*윤", phone: "010-****-5520", channel: "당근", attendance: 5, fee: "면제", book: "도둑맞은 집중력", role: "운영진", note: "제출" }
+    { id: 1, name: "***", phone: "010-0000-0000", channel: "소모임", attendance: 8, fee: "완료", book: "도둑맞은 집중력", role: "정회원", note: "제출" },
+    { id: 2, name: "***", phone: "010-0000-0000", channel: "당근", attendance: 3, fee: "완료", book: "도둑맞은 집중력", role: "일반회원", note: "제출" },
+    { id: 3, name: "***", phone: "010-0000-0000", channel: "인스타", attendance: 12, fee: "완료", book: "물고기는 존재하지 않는다", role: "운영진", note: "제출" },
+    { id: 4, name: "***", phone: "010-0000-0000", channel: "에타", attendance: 2, fee: "대기", book: "도둑맞은 집중력", role: "신규회원", note: "미제출" },
+    { id: 5, name: "***", phone: "010-0000-0000", channel: "카카오톡", attendance: 6, fee: "완료", book: "원씽 (The ONE Thing)", role: "정회원", note: "제출" },
+    { id: 6, name: "***", phone: "010-0000-0000", channel: "네이버", attendance: 4, fee: "대기", book: "도둑맞은 집중력", role: "일반회원", note: "미제출" },
+    { id: 7, name: "***", phone: "010-0000-0000", channel: "소모임", attendance: 9, fee: "완료", book: "클린 코드", role: "호스트", note: "제출" },
+    { id: 8, name: "***", phone: "010-0000-0000", channel: "당근", attendance: 5, fee: "면제", book: "도둑맞은 집중력", role: "운영진", note: "제출" }
   ];
 
   let rawStored = JSON.parse(localStorage.getItem("booklink_members_v3"));
