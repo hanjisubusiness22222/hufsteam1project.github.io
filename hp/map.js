@@ -1,4 +1,4 @@
-// 한국외대 주요 건물 DB (추가 및 수정 가능)
+// 한국외대 주요 건물 데이터베이스 (별칭 및 위치 정보)
 const hufsBuildings = [
   {
     name: "본관",
@@ -65,91 +65,15 @@ const hufsBuildings = [
   }
 ];
 
-let map = null;
-let currentInfowindow = null;
+// 구글 지도 및 카드 엘리먼트
+const googleMapFrame = document.getElementById('googleMapFrame');
+const cardName = document.getElementById('cardName');
+const cardAliases = document.getElementById('cardAliases');
+const cardDesc = document.getElementById('cardDesc');
+const cardRouteBtn = document.getElementById('cardRouteBtn');
+const buildingResultCard = document.getElementById('buildingResultCard');
 
-// 지도 컨테이너
-const mapContainer = document.getElementById('map');
-
-// 1. 카카오맵 안전 초기화 함수
-function initKakaoMap() {
-  if (typeof kakao === 'undefined' || !kakao.maps) {
-    console.warn("카카오맵 SDK가 로드되지 않았습니다. 로컬 file:// 접속이거나 도메인 미등록일 수 있습니다.");
-    renderFallbackView("카카오 지도 SDK 로딩 대기 중입니다.<br><small style='color:#64748b;font-weight:normal;'>인터넷 연결 및 카카오 개발자 도메인 등록(https://hanjisubusiness22222.github.io)을 확인해 주세요.</small>");
-    return;
-  }
-
-  kakao.maps.load(function () {
-    try {
-      const mapOption = {
-        center: new kakao.maps.LatLng(37.597148, 127.057850),
-        level: 3
-      };
-
-      map = new kakao.maps.Map(mapContainer, mapOption);
-
-      // 줌 컨트롤러 추가
-      const zoomControl = new kakao.maps.ZoomControl();
-      map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
-
-      // 기본 마커 등록
-      hufsBuildings.forEach((b) => {
-        const markerPos = new kakao.maps.LatLng(b.lat, b.lng);
-        const marker = new kakao.maps.Marker({
-          position: markerPos,
-          map: map
-        });
-
-        kakao.maps.event.addListener(marker, 'click', () => {
-          displayInfoWindow(b, marker);
-        });
-      });
-
-      console.log("카카오맵이 성공적으로 로드되었습니다.");
-    } catch (err) {
-      console.error("카카오맵 초기화 실패:", err);
-      renderFallbackView("지도를 표시하는 중 오류가 발생했습니다.<br><small>" + err.message + "</small>");
-    }
-  });
-}
-
-// 인포윈도우 표출 함수
-function displayInfoWindow(building, marker) {
-  if (!map) return;
-  if (currentInfowindow) currentInfowindow.close();
-
-  const content = `
-    <div class="custom-infowindow">
-      <span class="iw-badge">HUFS 건물 정보</span>
-      <h3 class="iw-title">${building.name}</h3>
-      <p class="iw-aliases">별칭: ${building.aliases.join(', ')}</p>
-      <p class="iw-desc">${building.desc}</p>
-    </div>
-  `;
-
-  currentInfowindow = new kakao.maps.InfoWindow({
-    content: content,
-    removable: true
-  });
-  currentInfowindow.open(map, marker);
-}
-
-// 지도가 미처 뜨지 않았을 때 보여주는 폴백 뷰
-function renderFallbackView(message) {
-  mapContainer.innerHTML = `
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#f1f5f9;color:#1e293b;padding:24px;text-align:center;">
-      <div style="font-size:40px;margin-bottom:12px;">🗺️</div>
-      <div style="font-size:1.1rem;font-weight:700;margin-bottom:8px;">${message}</div>
-      <p style="color:#64748b;font-size:0.9rem;max-width:460px;margin-bottom:20px;">
-        상단 검색창이나 아래 건물 칩을 클릭하시면 건물 상세 정보와 위치를 바로 확인하실 수 있습니다!
-      </p>
-      <div id="fallbackResultCard" style="display:none;background:white;padding:20px;border-radius:14px;box-shadow:0 8px 20px rgba(0,0,0,0.08);max-width:380px;text-align:left;border:1.5px solid #002c5f;">
-      </div>
-    </div>
-  `;
-}
-
-// 2. 건물 검색 함수
+// 검색 함수
 function searchBuilding(keyword) {
   const query = (keyword || searchInput.value).trim().toLowerCase();
   if (!query) {
@@ -158,47 +82,34 @@ function searchBuilding(keyword) {
     return;
   }
 
-  // DB 검색: 건물명 또는 별칭에 검색어가 포함되어 있는지 확인
+  // DB 검색 (이름 또는 별칭 매칭)
   const found = hufsBuildings.find(b => 
     b.name.toLowerCase().includes(query) || 
     b.aliases.some(alias => alias.toLowerCase().includes(query))
   );
 
   if (found) {
-    if (map) {
-      const moveLatLon = new kakao.maps.LatLng(found.lat, found.lng);
-      map.panTo(moveLatLon);
+    // 1. 구글 지도 iframe 위치 갱신 (18레벨로 상세 확대)
+    const embedUrl = `https://maps.google.com/maps?q=${found.lat},${found.lng}&hl=ko&z=18&output=embed`;
+    googleMapFrame.src = embedUrl;
 
-      const marker = new kakao.maps.Marker({
-        position: moveLatLon,
-        map: map
-      });
+    // 2. 결과 카드 업데이트
+    cardName.textContent = found.name;
+    cardAliases.textContent = `별칭: ${found.aliases.join(', ')}`;
+    cardDesc.textContent = found.desc;
+    cardRouteBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${found.lat},${found.lng}`;
+    cardRouteBtn.textContent = `🧭 ${found.name} 길찾기 (구글맵) ↗`;
 
-      displayInfoWindow(found, marker);
-    } else {
-      // 맵이 아직 로드되지 않은 경우 카드에 정보 표출
-      const fallbackCard = document.getElementById('fallbackResultCard');
-      if (fallbackCard) {
-        fallbackCard.style.display = 'block';
-        fallbackCard.innerHTML = `
-          <span style="font-size:0.75rem;background:#fef8ec;color:#002c5f;border:1px solid #c5a059;padding:2px 8px;border-radius:4px;font-weight:700;">HUFS 건물 정보</span>
-          <h3 style="margin:8px 0 4px;color:#002c5f;font-size:1.2rem;">${found.name}</h3>
-          <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:8px;">별칭: ${found.aliases.join(', ')}</p>
-          <p style="font-size:0.9rem;color:#334155;line-height:1.5;margin-bottom:12px;">${found.desc}</p>
-          <a href="https://map.kakao.com/link/map/${encodeURIComponent(found.name)},${found.lat},${found.lng}" target="_blank" style="display:inline-block;padding:8px 14px;background:#fee500;color:#191919;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;">
-            카카오맵 웹에서 위치 열기 ↗
-          </a>
-        `;
-      } else {
-        alert(`[${found.name}]\n별칭: ${found.aliases.join(', ')}\n\n${found.desc}`);
-      }
-    }
+    // 3. 카드 애니메이션 리셋
+    buildingResultCard.style.animation = 'none';
+    buildingResultCard.offsetHeight; // reflow
+    buildingResultCard.style.animation = 'slideIn 0.3s ease-out';
   } else {
     alert(`'${query}'에 일치하는 외대 건물을 찾을 수 없습니다.\n별칭(예: 미콤, 사관, 본관 등)으로 다시 검색해보세요!`);
   }
 }
 
-// 3. UI 이벤트 리스너 등록
+// 이벤트 리스너 등록
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
 
@@ -211,7 +122,7 @@ if (searchInput) {
   });
 }
 
-// 빠른 태그 클릭 이벤트
+// 빠른 태그 칩 클릭 이벤트
 document.querySelectorAll('.tag-chip').forEach((chip) => {
   chip.addEventListener('click', () => {
     const query = chip.getAttribute('data-query');
@@ -220,7 +131,7 @@ document.querySelectorAll('.tag-chip').forEach((chip) => {
   });
 });
 
-// 안내 카드 닫기 버튼
+// 서비스 소개 카드 닫기
 const btnCloseInfoCard = document.getElementById('btnCloseInfoCard');
 if (btnCloseInfoCard) {
   btnCloseInfoCard.addEventListener('click', () => {
@@ -228,6 +139,3 @@ if (btnCloseInfoCard) {
     if (card) card.style.display = 'none';
   });
 }
-
-// DOM 로드 완료 후 지도 초기화 실행
-window.addEventListener('DOMContentLoaded', initKakaoMap);

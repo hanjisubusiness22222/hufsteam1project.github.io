@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <title>HUFS 캠퍼스 맵 길찾기 | 1팀 (최수미, 한지수)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Pretendard 폰트 불러오기 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
   <style>
     :root {
@@ -87,7 +86,6 @@
       color: #002c5f;
       padding: 2px 8px;
       border-radius: 100px;
-      letter-spacing: 0;
     }
 
     .brand-desc {
@@ -184,7 +182,7 @@
       background: var(--hufs-blue);
     }
 
-    /* 추천/빠른 태그 칩 */
+    /* 빠른 태그 칩 */
     .quick-tags {
       display: flex;
       align-items: center;
@@ -203,7 +201,7 @@
       color: #334155;
       font-size: 0.8rem;
       font-weight: 500;
-      padding: 4px 10px;
+      padding: 5px 12px;
       border-radius: 6px;
       border: 1px solid #e2e8f0;
       cursor: pointer;
@@ -226,9 +224,87 @@
       height: 100%;
     }
 
-    #map {
+    #googleMapFrame {
       width: 100%;
       height: 100%;
+      border: none;
+    }
+
+    /* 검색 결과 팝업 카드 */
+    .building-result-card {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      max-width: 360px;
+      background: white;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      border: 2px solid var(--hufs-navy);
+      z-index: 10;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      background: var(--hufs-gold-light);
+      color: var(--hufs-navy);
+      border: 1px solid var(--hufs-gold);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .result-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--hufs-navy);
+      margin-bottom: 4px;
+    }
+
+    .result-aliases {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+
+    .result-desc {
+      font-size: 0.88rem;
+      color: #334155;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-route {
+      flex: 1;
+      padding: 9px;
+      background: #4285f4;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .btn-route:hover {
+      background: #3367d6;
     }
 
     /* 안내 플로팅 카드 (서비스 소개) */
@@ -284,68 +360,21 @@
       font-size: 0.78rem;
     }
 
-    /* 카카오 인포윈도우 커스텀 스타일 */
-    .custom-infowindow {
-      padding: 14px 16px;
-      border-radius: 12px;
-      background: white;
-      min-width: 200px;
-      max-width: 280px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-      font-family: 'Pretendard', sans-serif;
-    }
-
-    .iw-badge {
-      display: inline-block;
-      font-size: 0.7rem;
-      background: var(--hufs-gold-light);
-      color: var(--hufs-navy);
-      border: 1px solid var(--hufs-gold);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .iw-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--hufs-navy);
-      margin-bottom: 4px;
-    }
-
-    .iw-aliases {
-      font-size: 0.75rem;
-      color: #94a3b8;
-      margin-bottom: 6px;
-    }
-
-    .iw-desc {
-      font-size: 0.85rem;
-      color: #475569;
-      line-height: 1.4;
-    }
-
     @media (max-width: 640px) {
-      .app-header {
-        padding: 12px 16px;
+      .app-header { padding: 12px 16px; }
+      .brand-title { font-size: 1.1rem; }
+      .team-badge { font-size: 0.75rem; padding: 4px 10px; }
+      .search-panel { padding: 10px 16px; }
+      .building-result-card {
+        top: auto;
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        max-width: none;
       }
-      .brand-title {
-        font-size: 1.1rem;
-      }
-      .team-badge {
-        font-size: 0.75rem;
-        padding: 4px 10px;
-      }
-      .search-panel {
-        padding: 10px 16px;
-      }
-      .service-info-card {
-        display: none; /* 모바일에서는 맵 시야 확보를 위해 안내카드 숨김 */
-      }
+      .service-info-card { display: none; }
     }
   </style>
-  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=5d201b1815b6a6a5cd5bdfc894abbb26&autoload=false"></script>
 </head>
 
 <body>
@@ -357,7 +386,7 @@
         <div>
           <h1 class="brand-title">
             HUFS 스마트 캠퍼스 길찾기
-            <span class="badge-campus">서울캠퍼스</span>
+            <span class="badge-campus">Google Maps 기반</span>
           </h1>
           <p class="brand-desc">외대생을 위한 캠퍼스 건물 & 지름길 맞춤형 위치 가이드</p>
         </div>
@@ -392,9 +421,28 @@
     </div>
   </section>
 
-  <!-- 3. 카카오맵 영역 -->
+  <!-- 3. 구글 지도 영역 (100% 안정적 iframe) -->
   <div class="map-container-wrap">
-    <div id="map"></div>
+    <iframe 
+      id="googleMapFrame" 
+      src="https://maps.google.com/maps?q=37.597148,127.057850&hl=ko&z=17&output=embed" 
+      allowfullscreen 
+      loading="lazy" 
+      referrerpolicy="no-referrer-when-downgrade">
+    </iframe>
+
+    <!-- 검색 결과 플로팅 카드 -->
+    <div class="building-result-card" id="buildingResultCard">
+      <span class="result-badge">현재 표시 중인 건물</span>
+      <h2 class="result-title" id="cardName">한국외대 서울캠퍼스</h2>
+      <p class="result-aliases" id="cardAliases">별칭: 본관, 미콤, 사관 등 검색 가능</p>
+      <p class="result-desc" id="cardDesc">상단 검색창이나 자주 찾는 건물 칩을 누르시면 해당 건물로 지도가 즉시 포커싱됩니다.</p>
+      <div class="result-actions">
+        <a id="cardRouteBtn" href="https://www.google.com/maps/dir/?api=1&destination=37.597148,127.057850" target="_blank" class="btn-route">
+          🧭 구글 길찾기 안내 ↗
+        </a>
+      </div>
+    </div>
 
     <!-- 서비스 소개 플로팅 카드 -->
     <div class="service-info-card" id="serviceInfoCard">
@@ -403,8 +451,8 @@
         <button type="button" class="info-card-close" id="btnCloseInfoCard" title="닫기">✕</button>
       </div>
       <p class="info-card-desc">
-        기존 구글/네이버 지도는 도로명 주소 기반이라 건물 이름을 찾기 어렵습니다. 
-        <strong>외대 1팀</strong>에서는 외대생들의 실제 언어(별칭)와 주요 시설 정보를 기반으로 빠르고 정확한 건물 탐색을 지원합니다.
+        기존 지도는 도로명 주소 기반이라 캠퍼스 내부 건물명을 찾기 어렵습니다. 
+        <strong>외대 1팀</strong>에서는 외대생들의 실제 언어(별칭)와 주요 시설 정보를 기반으로 빠르고 정확한 위치 안내를 제공합니다.
       </p>
       <div class="info-features">
         <div>• 📍 <strong>별칭 매핑:</strong> '미콤', '사관' 검색 시 즉시 해당 건물 이동</div>
