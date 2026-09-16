@@ -381,11 +381,24 @@ function searchBuilding(keyword) {
     return;
   }
 
-  const found = hufsBuildings.find(b => 
-    b.name.toLowerCase().includes(query) || 
-    b.buildingNo.toLowerCase() === query ||
-    b.aliases.some(alias => alias.toLowerCase().includes(query))
-  );
+  // 1순위: 건물번호 정확 일치 (예: "C", "c", "0", "1", "2", "3", "5", "8", "9", "11", "B", "D")
+  let found = hufsBuildings.find(b => b.buildingNo.toLowerCase() === query);
+
+  // 2순위: 건물명 또는 별칭 정확 일치 (예: "사이버관", "사이버대", "미콤", "본관")
+  if (!found) {
+    found = hufsBuildings.find(b => 
+      b.name.toLowerCase() === query || 
+      b.aliases.some(alias => alias.toLowerCase() === query)
+    );
+  }
+
+  // 3순위: 건물명 또는 별칭 부분 일치 (2글자 이상 검색 시)
+  if (!found) {
+    found = hufsBuildings.find(b => 
+      b.name.toLowerCase().includes(query) || 
+      b.aliases.some(alias => alias.toLowerCase().includes(query))
+    );
+  }
 
   if (found) {
     map.flyTo([found.lat, found.lng], 18, { animate: true, duration: 1.0 });
