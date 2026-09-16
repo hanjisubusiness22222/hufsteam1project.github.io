@@ -41,6 +41,14 @@ const hufsBuildings = [
     desc: "법학전문대학원(로스쿨), 법학도서관, 모의법정 위치 (강의실 표기: 5-XXX호)"
   },
   {
+    buildingNo: "6",
+    name: "대학원 (대학원관)",
+    aliases: ["대학원", "대학원관", "일반대학원", "6", "6번", "6관"],
+    lat: 37.597532,
+    lng: 127.060108,
+    desc: "일반대학원 및 전문대학원 강의실, 대학원 교학처, 학과 세미나실, 원생 열람실 위치 (강의실 표기: 6-XXX호)"
+  },
+  {
     buildingNo: "8",
     name: "국제관",
     aliases: ["국제관", "국제지역대학원", "8", "8번", "8관"],
@@ -187,7 +195,6 @@ hufsBuildings.forEach((b) => {
     <div style="font-family:'Pretendard',sans-serif;padding:6px;min-width:180px;">
       <span style="font-size:0.75rem;background:#fef8ec;color:#002c5f;border:1px solid #c5a059;padding:2px 6px;border-radius:4px;font-weight:700;">건물번호: [ ${b.buildingNo} ] 번</span>
       <h3 style="margin:6px 0 3px;font-size:1.05rem;color:#002c5f;">${b.name}</h3>
-      <p style="font-size:0.72rem;color:#004b93;margin-bottom:4px;font-weight:600;">📍 GPS: ${b.lat}, ${b.lng}</p>
       <p style="font-size:0.75rem;color:#64748b;margin-bottom:6px;">별칭: ${b.aliases.join(', ')}</p>
       <p style="font-size:0.85rem;color:#334155;line-height:1.4;">${b.desc}</p>
     </div>
@@ -227,7 +234,7 @@ function selectBuilding(b) {
 function selectCampusArea() {
   if (cardBadge) cardBadge.textContent = "🏫 한국외대 캠퍼스 부지";
   cardName.textContent = "한국외국어대학교 서울캠퍼스";
-  cardAliases.textContent = "총 11개 주요 교육 및 행정 시설";
+  cardAliases.textContent = "총 12개 주요 교육 및 행정 시설 (0, 1, 2, 3, 5, 6, 8, 9, 11, B, C, D)";
   cardDesc.textContent = "점선으로 둘러싸인 네이비 라인은 외대 서울캠퍼스의 실제 부지 경계선입니다. [도보 경로 그리기]를 누르면 정문이나 내 위치에서 건물까지의 길이 그려집니다.";
   cardRouteBtn.href = `https://www.google.com/maps/dir/?api=1&destination=37.597348,127.057670`;
   cardRouteBtn.textContent = "🧭 외대 정문 길찾기 ↗";
@@ -239,12 +246,7 @@ function showBuildingDetail(building) {
     cardBadge.textContent = `건물번호: [ ${building.buildingNo} ] 번`;
   }
   cardName.textContent = building.name;
-  cardAliases.innerHTML = `
-    <span>별칭 / 코드: ${building.aliases.join(', ')}</span><br>
-    <span style="display:inline-block;margin-top:4px;color:#004b93;font-weight:600;font-size:0.8rem;background:#eef6ff;padding:2px 8px;border-radius:4px;border:1px solid #cce3fd;">
-      📍 GPS 좌표: ${building.lat}, ${building.lng}
-    </span>
-  `;
+  cardAliases.textContent = `별칭 / 코드: ${building.aliases.join(', ')}`;
   cardDesc.textContent = building.desc;
   cardRouteBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${building.lat},${building.lng}`;
   cardRouteBtn.textContent = `🧭 구글 길찾기 ↗`;
