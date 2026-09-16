@@ -3023,7 +3023,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { id: 8, name: "***", phone: "010-0000-0000", channel: "당근", attendance: 5, fee: "면제", book: "도둑맞은 집중력", role: "운영진", note: "제출" }
   ];
 
-  let rawStored = JSON.parse(localStorage.getItem("booklink_members_v3"));
+  let rawStored = JSON.parse(localStorage.getItem("booklink_members_v4"));
   let members = (rawStored && rawStored.length > 0) ? rawStored : [...initialMembers];
   // 기존 저장 데이터도 이름과 연락처 익명 마스킹 적용
   members = members.map((m) => ({
@@ -3507,7 +3507,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function saveAndRefresh() {
-    localStorage.setItem("booklink_members_v3", JSON.stringify(members));
+    localStorage.setItem("booklink_members_v4", JSON.stringify(members));
     renderMemberTable();
   }
 
