@@ -76,8 +76,8 @@ const hufsBuildings = [
     buildingNo: "C",
     name: "사이버관 (사이버대학교)",
     aliases: ["사관", "사이버", "사이버관", "사이버대", "사이버외대", "사이버대학교", "대강당", "C", "c", "C동", "C관"],
-    lat: 37.5977,
-    lng: 127.0573,
+    lat: 37.5962376,
+    lng: 127.0596867,
     desc: "사이버한국외국어대학교 본부, 대강당, PC 실습실 및 멀티미디어 강의실 (건물번호: C번)"
   },
   {
@@ -89,6 +89,9 @@ const hufsBuildings = [
     desc: "외대 기숙사 및 동아리방, 유학생 레지던스, 학생 자치 공간 위치 (기숙사/동아리)"
   }
 ];
+
+// 외대 정문 기준 좌표 (GPS 미수신 시 기본 출발점)
+const HUFS_MAIN_GATE = { lat: 37.595672, lng: 127.058935, name: "외대 정문" };
 
 // 한국외국어대학교 서울캠퍼스 실제 부지 외곽선 (정밀 실측 Polygon 좌표)
 const hufsCampusBoundary = [
@@ -127,7 +130,7 @@ const hufsCampusBoundary = [
   [37.595672, 127.0589345]
 ];
 
-// 1. Leaflet 지도 초기화 (한국외대 서울캠퍼스 중심)
+// 1. Leaflet 지도 초기화
 const map = L.map('map', {
   center: [37.597148, 127.058150],
   zoom: 17,
@@ -135,21 +138,21 @@ const map = L.map('map', {
   maxZoom: 19
 });
 
-// 고해상도 한글 타일맵 로드 (CartoDB Voyager: 깔끔하고 현대적인 지도)
+// 고해상도 한글 타일맵 로드 (CartoDB Voyager)
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
   subdomains: 'abcd',
   maxZoom: 20
 }).addTo(map);
 
-// 2. 외대 캠퍼스 정밀 둘레선 (폴리곤) 생성
+// 2. 외대 캠퍼스 정밀 둘레선 (폴리곤)
 let campusPolygon = L.polygon(hufsCampusBoundary, {
-  color: '#002c5f',       // 외대 시그니처 네이비 테두리
-  weight: 3.5,            // 둘레선 두께
+  color: '#002c5f',
+  weight: 3.5,
   opacity: 0.95,
-  fillColor: '#004b93',   // 내부 부지 반투명 채우기
+  fillColor: '#004b93',
   fillOpacity: 0.12,
-  dashArray: '6, 6'       // 세련된 캠퍼스 경계선 점선 효과
+  dashArray: '6, 6'
 }).addTo(map);
 
 campusPolygon.bindTooltip("🏛️ 한국외국어대학교 서울캠퍼스 부지", { sticky: true });
@@ -157,8 +160,12 @@ campusPolygon.on('click', () => {
   selectCampusArea();
 });
 
-// 3. 건물 마커 핀 등록 (건물번호 뱃지 + 이름)
+// 3. 건물 마커 핀 등록
 const buildingMarkers = {};
+let selectedBuilding = hufsBuildings[0]; // 기본 선택: 본관
+let currentUserLocation = null;        // 사용자 GPS 위치
+let currentRouteGlow = null;           // 경로 외곽 글로우 라인
+let currentRouteLine = null;           // 경로 메인 라인
 
 hufsBuildings.forEach((b) => {
   const customIcon = L.divIcon({
@@ -187,7 +194,7 @@ hufsBuildings.forEach((b) => {
   marker.bindPopup(popupContent);
 
   marker.on('click', () => {
-    showBuildingDetail(b);
+    selectBuilding(b);
   });
 });
 
@@ -202,15 +209,27 @@ const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
 const btnToggleBoundary = document.getElementById('btnToggleBoundary');
 const btnMyLocation = document.getElementById('btnMyLocation');
+const btnDrawRoute = document.getElementById('btnDrawRoute');
 
-// 캠퍼스 전체 선택 시 카드 안내
+// 건물 선택 시 처리
+function selectBuilding(b) {
+  selectedBuilding = b;
+  showBuildingDetail(b);
+
+  // 이미 경로가 켜져 있는 상태라면 새 건물로 경로 즉시 재계산
+  if (btnDrawRoute && btnDrawRoute.classList.contains('active-route')) {
+    startRoutingToBuilding(b);
+  }
+}
+
+// 캠퍼스 전체 선택
 function selectCampusArea() {
   if (cardBadge) cardBadge.textContent = "🏫 한국외대 캠퍼스 부지";
   cardName.textContent = "한국외국어대학교 서울캠퍼스";
   cardAliases.textContent = "총 11개 주요 교육 및 행정 시설";
-  cardDesc.textContent = "점선으로 둘러싸인 네이비 라인은 외대 서울캠퍼스의 실제 부지 경계선입니다. 상단 둘레선 버튼으로 켜거나 끌 수 있습니다.";
+  cardDesc.textContent = "점선으로 둘러싸인 네이비 라인은 외대 서울캠퍼스의 실제 부지 경계선입니다. [도보 경로 그리기]를 누르면 정문이나 내 위치에서 건물까지의 길이 그려집니다.";
   cardRouteBtn.href = `https://www.google.com/maps/dir/?api=1&destination=37.597348,127.057670`;
-  cardRouteBtn.textContent = "🧭 정문으로 길찾기 ↗";
+  cardRouteBtn.textContent = "🧭 외대 정문 길찾기 ↗";
 }
 
 // 건물 상세 카드 갱신
@@ -222,15 +241,132 @@ function showBuildingDetail(building) {
   cardAliases.textContent = `별칭 / 코드: ${building.aliases.join(', ')}`;
   cardDesc.textContent = building.desc;
   cardRouteBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${building.lat},${building.lng}`;
-  cardRouteBtn.textContent = `🧭 ${building.name} 길찾기 (구글맵) ↗`;
+  cardRouteBtn.textContent = `🧭 구글 길찾기 ↗`;
 
-  // 카드 슬라이드 애니메이션
+  if (btnDrawRoute && !btnDrawRoute.classList.contains('active-route')) {
+    btnDrawRoute.textContent = `🚶 ${building.name.split(' ')[0]} 도보선 그리기`;
+  }
+
   buildingResultCard.style.animation = 'none';
-  buildingResultCard.offsetHeight; // reflow
+  buildingResultCard.offsetHeight;
   buildingResultCard.style.animation = 'slideIn 0.3s ease-out';
 }
 
-// 4. 건물 검색 함수
+// 4. 도보 경로 안내 (OSRM Foot Routing)
+async function startRoutingToBuilding(destBuilding) {
+  let startPoint = currentUserLocation;
+  let startName = "내 현재 위치";
+
+  // 만약 아직 GPS 위치를 안 찍었으면 외대 정문을 기본 출발점으로 사용
+  if (!startPoint) {
+    startPoint = HUFS_MAIN_GATE;
+    startName = "외대 정문";
+  }
+
+  clearRouteLines();
+
+  if (btnDrawRoute) {
+    btnDrawRoute.textContent = "⏳ 경로 계산 중...";
+  }
+
+  try {
+    const url = `https://router.project-osrm.org/route/v1/foot/${startPoint.lng},${startPoint.lat};${destBuilding.lng},${destBuilding.lat}?overview=full&geometries=geojson`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+      const route = data.routes[0];
+      const coords = route.geometry.coordinates.map(c => [c[1], c[0]]); // [lat, lng]
+      const distanceM = Math.round(route.distance);
+      const minutes = Math.max(1, Math.ceil(distanceM / 67)); // 4km/h = 약 67m/분
+
+      // 1. 외곽 네이비 글로우 선
+      currentRouteGlow = L.polyline(coords, {
+        color: '#002c5f',
+        weight: 9,
+        opacity: 0.35,
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(map);
+
+      // 2. 중심 밝은 블루 점선
+      currentRouteLine = L.polyline(coords, {
+        color: '#0070f3',
+        weight: 5,
+        opacity: 0.95,
+        lineCap: 'round',
+        lineJoin: 'round',
+        dashArray: '8, 4'
+      }).addTo(map);
+
+      // 카메라를 경로 전체가 보이도록 줌 맞춤
+      map.fitBounds(currentRouteLine.getBounds(), { padding: [60, 60], maxZoom: 18 });
+
+      // 카드 정보 업데이트
+      if (cardBadge) cardBadge.textContent = `🚶 도보 약 ${minutes}분 (${distanceM}m)`;
+      cardName.textContent = `${startName} ➔ ${destBuilding.name}`;
+      cardDesc.innerHTML = `
+        <strong>출발:</strong> ${startName} ➔ <strong>도착:</strong> ${destBuilding.name}<br>
+        <strong>도보 거리:</strong> ${distanceM} m (약 ${minutes}분 소요)<br>
+        <span style="color:#0070f3;font-weight:600;">* 지도 위에 실제 보행로를 따른 파란색 점선 경로가 그려졌습니다.</span>
+      `;
+
+      if (btnDrawRoute) {
+        btnDrawRoute.textContent = "❌ 경로 지우기";
+        btnDrawRoute.classList.add('active-route');
+      }
+    } else {
+      throw new Error("경로 데이터 없음");
+    }
+  } catch (err) {
+    console.warn("보행로 API 응답 지연/실패로 유도 직선으로 대체:", err);
+    // 대체용 시그니처 점선
+    const coords = [[startPoint.lat, startPoint.lng], [destBuilding.lat, destBuilding.lng]];
+    currentRouteLine = L.polyline(coords, {
+      color: '#0070f3',
+      weight: 5,
+      opacity: 0.9,
+      dashArray: '10, 10'
+    }).addTo(map);
+    map.fitBounds(currentRouteLine.getBounds(), { padding: [60, 60] });
+
+    if (cardBadge) cardBadge.textContent = `🧭 직선 유도 경로`;
+    cardDesc.innerHTML = `<strong>출발:</strong> ${startName} ➔ <strong>도착:</strong> ${destBuilding.name}<br><small style="color:#64748b;">* 지도 위에 유도선이 표출되었습니다.</small>`;
+    if (btnDrawRoute) {
+      btnDrawRoute.textContent = "❌ 경로 지우기";
+      btnDrawRoute.classList.add('active-route');
+    }
+  }
+}
+
+// 경로선 지우기 함수
+function clearRouteLines() {
+  if (currentRouteGlow) {
+    map.removeLayer(currentRouteGlow);
+    currentRouteGlow = null;
+  }
+  if (currentRouteLine) {
+    map.removeLayer(currentRouteLine);
+    currentRouteLine = null;
+  }
+}
+
+// 경로 그리기 버튼 이벤트
+if (btnDrawRoute) {
+  btnDrawRoute.addEventListener('click', () => {
+    if (btnDrawRoute.classList.contains('active-route')) {
+      // 경로 지우기
+      clearRouteLines();
+      btnDrawRoute.classList.remove('active-route');
+      showBuildingDetail(selectedBuilding);
+    } else {
+      // 경로 그리기
+      startRoutingToBuilding(selectedBuilding);
+    }
+  });
+}
+
+// 5. 건물 검색 함수
 function searchBuilding(keyword) {
   const query = (keyword || searchInput.value).trim().toLowerCase();
   if (!query) {
@@ -246,24 +382,18 @@ function searchBuilding(keyword) {
   );
 
   if (found) {
-    // 1. 해당 건물 좌표로 부드럽게 카메라 이동 (FlyTo)
-    map.flyTo([found.lat, found.lng], 18, {
-      animate: true,
-      duration: 1.0
-    });
+    map.flyTo([found.lat, found.lng], 18, { animate: true, duration: 1.0 });
 
-    // 2. 팝업 오픈
     const marker = buildingMarkers[found.buildingNo];
     if (marker) marker.openPopup();
 
-    // 3. 카드 정보 갱신
-    showBuildingDetail(found);
+    selectBuilding(found);
   } else {
     alert(`'${query}'에 일치하는 외대 건물을 찾을 수 없습니다.\n별칭(예: 미콤, 사관, 본관 등)이나 건물번호(0, 1, B 등)로 검색해보세요!`);
   }
 }
 
-// 5. 캠퍼스 둘레선 On/Off 토글 버튼
+// 6. 캠퍼스 둘레선 On/Off 토글
 let isBoundaryVisible = true;
 
 if (btnToggleBoundary) {
@@ -283,7 +413,7 @@ if (btnToggleBoundary) {
   });
 }
 
-// 6. 실시간 내 GPS 위치 찾기
+// 7. 실시간 내 GPS 위치 찾기
 let myLocationMarker = null;
 let myLocationCircle = null;
 
@@ -307,11 +437,11 @@ if (btnMyLocation) {
         const lng = position.coords.longitude;
         const accuracy = Math.round(position.coords.accuracy);
 
-        // 기존 마커 제거
+        currentUserLocation = { lat, lng, name: "내 현재 위치" };
+
         if (myLocationMarker) map.removeLayer(myLocationMarker);
         if (myLocationCircle) map.removeLayer(myLocationCircle);
 
-        // 내 위치 파란색 펄스 핀 표시
         const myPinIcon = L.divIcon({
           className: 'custom-building-pin',
           html: `<div style="background:#10b981;color:white;padding:5px 10px;border-radius:14px;font-weight:800;font-size:0.8rem;border:2px solid white;box-shadow:0 4px 12px rgba(16,185,129,0.5);">📍 내 위치</div>`,
@@ -322,14 +452,22 @@ if (btnMyLocation) {
         myLocationMarker = L.marker([lat, lng], { icon: myPinIcon }).addTo(map);
         myLocationCircle = L.circle([lat, lng], { radius: accuracy, color: '#10b981', fillOpacity: 0.15 }).addTo(map);
 
+        // 내 위치로 지도 이동
         map.flyTo([lat, lng], 18, { animate: true, duration: 1.0 });
 
-        if (cardBadge) cardBadge.textContent = "📍 실시간 GPS 내 위치";
-        cardName.textContent = "현재 내 위치 (GPS)";
+        if (cardBadge) cardBadge.textContent = "📍 실시간 GPS 내 위치 수신됨";
+        cardName.textContent = "현재 내 위치";
         cardAliases.textContent = `위도: ${lat.toFixed(6)}, 경도: ${lng.toFixed(6)} (정확도: ±${accuracy}m)`;
-        cardDesc.textContent = "스마트폰/PC의 GPS 센서를 기반으로 측정한 현재 위치입니다. 캠퍼스 내 위치를 확인하고 목적지 건물을 검색해 보세요!";
+        cardDesc.innerHTML = `
+          내 위치가 성공적으로 수신되었습니다!<br>
+          아래 <strong>[${selectedBuilding.name.split(' ')[0]} 도보선 그리기]</strong> 버튼을 누르시면 현재 내 위치에서 해당 건물까지의 실제 이동 경로가 지도에 표시됩니다.
+        `;
         cardRouteBtn.href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-        cardRouteBtn.textContent = "🧭 구글 지도에서 내 위치 열기 ↗";
+        cardRouteBtn.textContent = "🧭 내 위치 지도 크게보기 ↗";
+
+        if (btnDrawRoute) {
+          btnDrawRoute.textContent = `🚶 ${selectedBuilding.name.split(' ')[0]} 도보선 그리기`;
+        }
 
         buildingResultCard.style.animation = 'none';
         buildingResultCard.offsetHeight;
@@ -340,7 +478,7 @@ if (btnMyLocation) {
         btnMyLocation.disabled = false;
         let msg = "위치 정보를 가져오지 못했습니다.";
         if (error.code === error.PERMISSION_DENIED) {
-          msg = "브라우저 위치 권한을 허용해 주셔야 현재 위치를 표시할 수 있습니다.";
+          msg = "브라우저 위치 권한이 차단되어 있습니다.\n외대 정문(기본 출발점) 기준으로 길찾기 선을 그립니다.";
         }
         alert(msg);
       },
@@ -374,3 +512,6 @@ if (btnCloseInfoCard) {
     if (card) card.style.display = 'none';
   });
 }
+
+// 초기 기본 선택 건물 표출
+showBuildingDetail(hufsBuildings[0]);
