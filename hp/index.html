@@ -403,25 +403,25 @@
     <div class="search-bar-wrap">
       <div class="search-input-box">
         <span class="icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="건물명 또는 별칭을 입력하세요 (예: 미콤, 사관, 교수학습개발원, 본관)" autocomplete="off">
+        <input type="text" id="searchInput" placeholder="건물명, 번호 또는 별칭을 입력하세요 (예: 1, 0, B, C, 미콤, 사관)" autocomplete="off">
       </div>
       <button class="btn-search" id="searchBtn">건물 찾기</button>
     </div>
 
-    <!-- 빠른 검색 태그 칩 -->
+    <!-- 빠른 검색 태그 칩 (공식 건물번호 표기) -->
     <div class="quick-tags">
-      <span class="tags-label">자주 찾는 건물:</span>
-      <button type="button" class="tag-chip" data-query="본관">#본관</button>
-      <button type="button" class="tag-chip" data-query="미콤">#미네르바(미콤)</button>
-      <button type="button" class="tag-chip" data-query="사관">#사이버관(사관)</button>
-      <button type="button" class="tag-chip" data-query="도서관">#스마트도서관</button>
-      <button type="button" class="tag-chip" data-query="교수회관">#교수회관(학식)</button>
-      <button type="button" class="tag-chip" data-query="교수학습개발원">#교수학습개발원(교학원)</button>
-      <button type="button" class="tag-chip" data-query="인문관">#인문과학관</button>
-      <button type="button" class="tag-chip" data-query="사회과학관">#사회과학관</button>
-      <button type="button" class="tag-chip" data-query="국제학사">#국제학사</button>
-      <button type="button" class="tag-chip" data-query="법학관">#법학관</button>
-      <button type="button" class="tag-chip" data-query="국제관">#국제관</button>
+      <span class="tags-label">캠퍼스 건물번호:</span>
+      <button type="button" class="tag-chip" data-query="0">#0 본관</button>
+      <button type="button" class="tag-chip" data-query="1">#1 인문과학관</button>
+      <button type="button" class="tag-chip" data-query="2">#2 교학원(CTL)</button>
+      <button type="button" class="tag-chip" data-query="3">#3 사회과학관</button>
+      <button type="button" class="tag-chip" data-query="5">#5 법학관</button>
+      <button type="button" class="tag-chip" data-query="8">#8 국제관</button>
+      <button type="button" class="tag-chip" data-query="9">#9 스마트도서관</button>
+      <button type="button" class="tag-chip" data-query="11">#11 교수회관</button>
+      <button type="button" class="tag-chip" data-query="B">#B 미네르바(미콤)</button>
+      <button type="button" class="tag-chip" data-query="C">#C 사이버관(사관)</button>
+      <button type="button" class="tag-chip" data-query="D">#D 국제학사</button>
     </div>
   </section>
 
@@ -437,7 +437,7 @@
 
     <!-- 검색 결과 플로팅 카드 -->
     <div class="building-result-card" id="buildingResultCard">
-      <span class="result-badge">현재 표시 중인 건물</span>
+      <span class="result-badge" id="cardBadge">외대 서울캠퍼스 맵</span>
       <h2 class="result-title" id="cardName">한국외대 서울캠퍼스</h2>
       <p class="result-aliases" id="cardAliases">별칭: 본관, 미콤, 사관 등 검색 가능</p>
       <p class="result-desc" id="cardDesc">상단 검색창이나 자주 찾는 건물 칩을 누르시면 해당 건물로 지도가 즉시 포커싱됩니다.</p>

@@ -1,86 +1,98 @@
-// 한국외대 주요 건물 데이터베이스 (실제 지도 측량 기반 정밀 GPS 좌표)
+// 한국외대 주요 건물 데이터베이스 (공식 건물 번호 및 정밀 GPS 좌표)
 const hufsBuildings = [
   {
+    buildingNo: "0",
     name: "본관",
-    aliases: ["본관", "대학본부", "main", "총장실"],
+    aliases: ["본관", "대학본부", "main", "총장실", "0", "0번", "0관"],
     lat: 37.597348,
     lng: 127.057670,
-    desc: "외대 캠퍼스 중심 상징 건물. 대학본부, 총장실, 교무처 등 주요 행정 부서 위치"
+    desc: "외대 캠퍼스 중심 상징 건물. 대학본부, 총장실, 교무처 등 주요 행정 부서 위치 (강의실 표기: 0-XXX호)"
   },
   {
-    name: "미네르바 콤플렉스",
-    aliases: ["미콤", "미네르바", "오바마홀", "체육관"],
-    lat: 37.597200,
-    lng: 127.058150,
-    desc: "본관 앞 잔디광장 지하 복합시설. 대강당(오바마홀), 국제회의실, 피트니스 및 학생 편의시설"
-  },
-  {
-    name: "사이버관",
-    aliases: ["사관", "사이버", "대강당"],
-    lat: 37.596278,
-    lng: 127.059751,
-    desc: "외대 정문 우측 위치. 사이버한국외국어대학교 본부, 대강당, 멀티미디어 강의실"
-  },
-  {
-    name: "스마트도서관 (중앙도서관)",
-    aliases: ["도서관", "중도", "도관", "스마트도서관"],
-    lat: 37.595956,
-    lng: 127.058765,
-    desc: "외대 중앙 스마트도서관. 열람실, 전자정보실, 캐럴, 북카페 위치"
-  },
-  {
-    name: "교수회관",
-    aliases: ["교수회관", "교회", "학식", "학식당", "교직원식당"],
-    lat: 37.595799,
-    lng: 127.059474,
-    desc: "교수 연구실, 강연장 및 지하 1층 학생식당 / 2층 교직원식당 위치"
-  },
-  {
+    buildingNo: "1",
     name: "인문과학관 (인문관)",
-    aliases: ["인문관", "인문과학관", "인문대"],
+    aliases: ["인문관", "인문과학관", "인문대", "1", "1번", "1관"],
     lat: 37.598130,
     lng: 127.057257,
-    desc: "캠퍼스 북서쪽 위치. 철학과, 사학과, 언어인지과학과 등 인문대학 주요 강의실"
+    desc: "캠퍼스 북서쪽 위치. 철학과, 사학과, 언어인지과학과 등 인문대학 주요 강의실 (강의실 표기: 1-XXX호)"
   },
   {
-    name: "사회과학관",
-    aliases: ["사회과학관", "사과관", "사회대"],
-    lat: 37.596104,
-    lng: 127.057765,
-    desc: "정경대학 및 미디어커뮤니케이션학부 등 사회과학대학 주요 강의실 위치"
-  },
-  {
-    name: "국제학사 (신학생회관)",
-    aliases: ["국제학사", "기숙사", "글로비돔", "학사", "신학생회관"],
-    lat: 37.596462,
-    lng: 127.057335,
-    desc: "외대 기숙사 및 동아리방, 유학생 레지던스, 학생 자치 공간 위치"
-  },
-  {
-    name: "법학관",
-    aliases: ["법학관", "로스쿨", "법대"],
-    lat: 37.596708,
-    lng: 127.057507,
-    desc: "법학전문대학원(로스쿨), 법학도서관, 모의법정 위치"
-  },
-  {
-    name: "국제관",
-    aliases: ["국제관", "국제지역대학원"],
-    lat: 37.598034,
-    lng: 127.059392,
-    desc: "국제지역대학원, 통번역대학원 연구실 및 외국어 교육 시설 위치"
-  },
-  {
-    name: "교수학습개발원",
-    aliases: ["교수학습개발원", "교학원", "CTL", "교수학습"],
+    buildingNo: "2",
+    name: "교수학습개발원 (CTL)",
+    aliases: ["교수학습개발원", "교학원", "CTL", "교수학습", "2", "2번", "2관"],
     lat: 37.598404,
     lng: 127.057955,
-    desc: "교수학습 역량 지원, 온라인 강의 스튜디오 및 이러닝 콘텐츠 제작 센터 위치"
+    desc: "교수학습 역량 지원, 온라인 강의 스튜디오 및 이러닝 콘텐츠 제작 센터 (건물번호: 2번)"
+  },
+  {
+    buildingNo: "3",
+    name: "사회과학관",
+    aliases: ["사회과학관", "사과관", "사회대", "3", "3번", "3관"],
+    lat: 37.596104,
+    lng: 127.057765,
+    desc: "정경대학 및 미디어커뮤니케이션학부 등 사회과학대학 주요 강의실 (강의실 표기: 3-XXX호)"
+  },
+  {
+    buildingNo: "5",
+    name: "법학관",
+    aliases: ["법학관", "로스쿨", "법대", "5", "5번", "5관"],
+    lat: 37.596708,
+    lng: 127.057507,
+    desc: "법학전문대학원(로스쿨), 법학도서관, 모의법정 위치 (강의실 표기: 5-XXX호)"
+  },
+  {
+    buildingNo: "8",
+    name: "국제관",
+    aliases: ["국제관", "국제지역대학원", "8", "8번", "8관"],
+    lat: 37.598034,
+    lng: 127.059392,
+    desc: "국제지역대학원, 통번역대학원 연구실 및 외국어 교육 시설 위치 (강의실 표기: 8-XXX호)"
+  },
+  {
+    buildingNo: "9",
+    name: "스마트도서관 (중앙도서관)",
+    aliases: ["도서관", "중도", "도관", "스마트도서관", "9", "9번", "9관"],
+    lat: 37.595956,
+    lng: 127.058765,
+    desc: "외대 중앙 스마트도서관. 열람실, 전자정보실, 캐럴, 북카페 위치 (건물번호: 9번)"
+  },
+  {
+    buildingNo: "11",
+    name: "교수회관",
+    aliases: ["교수회관", "교회", "학식", "학식당", "교직원식당", "11", "11번", "11관"],
+    lat: 37.595799,
+    lng: 127.059474,
+    desc: "교수 연구실, 강연장 및 지하 1층 학생식당 / 2층 교직원식당 위치 (건물번호: 11번)"
+  },
+  {
+    buildingNo: "B",
+    name: "미네르바 콤플렉스",
+    aliases: ["미콤", "미네르바", "오바마홀", "체육관", "B", "b", "B동", "B관"],
+    lat: 37.597200,
+    lng: 127.058150,
+    desc: "본관 앞 잔디광장 지하 복합시설. 대강당(오바마홀), 국제회의실, 피트니스 및 학생 편의시설 (강의실 표기: B-XXX호)"
+  },
+  {
+    buildingNo: "C",
+    name: "사이버관",
+    aliases: ["사관", "사이버", "대강당", "C", "c", "C동", "C관"],
+    lat: 37.596278,
+    lng: 127.059751,
+    desc: "외대 정문 우측 위치. 사이버한국외국어대학교 본부, 대강당, 멀티미디어 강의실 (강의실 표기: C-XXX호)"
+  },
+  {
+    buildingNo: "D",
+    name: "국제학사 (신학생회관)",
+    aliases: ["국제학사", "기숙사", "글로비돔", "학사", "신학생회관", "D", "d", "D동"],
+    lat: 37.596462,
+    lng: 127.057335,
+    desc: "외대 기숙사 및 동아리방, 유학생 레지던스, 학생 자치 공간 위치 (기숙사/동아리)"
   }
 ];
 
 // 구글 지도 및 카드 엘리먼트
 const googleMapFrame = document.getElementById('googleMapFrame');
+const cardBadge = document.getElementById('cardBadge');
 const cardName = document.getElementById('cardName');
 const cardAliases = document.getElementById('cardAliases');
 const cardDesc = document.getElementById('cardDesc');
@@ -91,14 +103,15 @@ const buildingResultCard = document.getElementById('buildingResultCard');
 function searchBuilding(keyword) {
   const query = (keyword || searchInput.value).trim().toLowerCase();
   if (!query) {
-    alert("검색어를 입력해주세요! (예: 미콤, 사관, 도서관, 본관)");
+    alert("건물명, 별칭 또는 건물번호를 입력하세요 (예: 본관, 미콤, 0, 1, B, C)");
     searchInput.focus();
     return;
   }
 
-  // DB 검색 (이름 또는 별칭 매칭)
+  // DB 검색 (이름, 건물번호 또는 별칭 매칭)
   const found = hufsBuildings.find(b => 
     b.name.toLowerCase().includes(query) || 
+    b.buildingNo.toLowerCase() === query ||
     b.aliases.some(alias => alias.toLowerCase().includes(query))
   );
 
@@ -107,9 +120,12 @@ function searchBuilding(keyword) {
     const embedUrl = `https://maps.google.com/maps?q=${found.lat},${found.lng}&hl=ko&z=18&output=embed`;
     googleMapFrame.src = embedUrl;
 
-    // 2. 결과 카드 업데이트
+    // 2. 결과 카드 업데이트 (건물번호 뱃지 반영)
+    if (cardBadge) {
+      cardBadge.textContent = `건물번호: [ ${found.buildingNo} ] 번`;
+    }
     cardName.textContent = found.name;
-    cardAliases.textContent = `별칭: ${found.aliases.join(', ')}`;
+    cardAliases.textContent = `별칭 / 코드: ${found.aliases.join(', ')}`;
     cardDesc.textContent = found.desc;
     cardRouteBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${found.lat},${found.lng}`;
     cardRouteBtn.textContent = `🧭 ${found.name} 길찾기 (구글맵) ↗`;
